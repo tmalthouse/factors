@@ -1,1 +1,2 @@
-Time to factor 100000 random numbers using 1 thread on an RPi 3: 4m58.160s
+Time to factor 100000 random numbers using 1 thread and -O0 on an RPi 3: 4m58.160s
+Time to factor 100000 random numbers using 1 thread and -O3 + -ffast-math on an RPi 3: 4m7.720s
