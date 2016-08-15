@@ -1,12 +1,12 @@
-CFLAGS=-Wpedantic -Wall
+CFLAGS=-Wpedantic -Wall -O3 -ffast-math -std=c11
 
 all: cache factor
 
 cache: createcache.c
-	gcc createcache.c $(CFLAGS) -std=c11 -lm -ggdb -ocache
+	gcc createcache.c $(CFLAGS) -lm -ocache
 
 factor: factor.c
-	gcc factor.c $(CFLAGS) -std=c11 -ggdb -ofactor
+	gcc factor.c $(CFLAGS) -ofactor
 
 randgen: randgen.c
-	gcc randgen.c $(CFLAGS) -std=c11 -orandgen
+	gcc randgen.c $(CFLAGS) -orandgen
