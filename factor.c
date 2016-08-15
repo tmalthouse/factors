@@ -69,6 +69,11 @@ int main(int argc, char **argv)
 {
 	FILE *primes_f;
 	primes_f = fopen("primes.cache", "r");
+    if (primes_f == NULL) {
+        printf("Couldn't open prime cache file!");
+        return 1;
+    }
+    
 	fseek(primes_f, 0L, SEEK_END);
 	size_t sz = ftell(primes_f);
 	rewind(primes_f);
@@ -90,13 +95,20 @@ int main(int argc, char **argv)
 	}
 
 	int numcount = countlines(input);
-    printf("Done parsing input file!");
+    printf("Done parsing input file!\n");
 
 	uint64_t *numbers = calloc(sizeof(uint64_t), numcount);
 
 	fill_num_array(input, numbers);
+    
+    fclose(input);
+    FILE *output = fopen(argv[1], "w");
 
-	FILE *output = freopen(NULL, "w", input);	
+    if (output == NULL) {
+        printf("Couldn't output to file!\n");
+        perror("Error:");
+        return 1;
+    }
 
 	for (uint64_t i=0; i<numcount; i++) {
 		uint64_t factors[64];
