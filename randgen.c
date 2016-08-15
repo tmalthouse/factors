@@ -31,7 +31,7 @@ int main(int argc, char **argv)
     }
 
     for (int i=0; i<quantity; i++) {
-        fprintf(out, "%d\n", rand());
+        fprintf(out, "%d\n", rand()%1000000);
     }
     fclose(out);
 }
