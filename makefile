@@ -6,7 +6,7 @@ cache: createcache.c
 	gcc createcache.c $(CFLAGS) -lm -ocache
 
 factor: factor.c
-	gcc factor.c $(CFLAGS) -ofactor
+	gcc factor.c $(CFLAGS) -lgmp -ofactor
 
 randgen: randgen.c
 	gcc randgen.c $(CFLAGS) -orandgen

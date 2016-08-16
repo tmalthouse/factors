@@ -2,6 +2,7 @@
 #include<stdbool.h>
 #include<stdio.h>
 #include<stdlib.h>
+#include<gmp.h>
 
 int countlines(FILE *fp)
 {
@@ -18,6 +19,8 @@ int countlines(FILE *fp)
 	return lines;
 }
 
+
+
 bool sorted_array_contains(uint64_t val, uint64_t *array, uint64_t len)
 {
 	for (uint64_t i=0; array[i]>val || i>len; i++) {
@@ -28,6 +31,34 @@ bool sorted_array_contains(uint64_t val, uint64_t *array, uint64_t len)
 	return false;
 }
 
+bool isprime(uint64_t val, uint64_t *primes, uint64_t len)
+{
+    uint64_t max_cached = primes[len-1];
+
+    if (val <= max_cached) {
+        if (sorted_array_contains(val, primes, len)) {
+            return true;
+        } else {
+            return false;
+        }
+    }
+
+    mpz_t num;
+
+    mpz_init_set_ui(num, val);
+
+    int result = mpz_probab_prime_p(num, 50);
+
+    if (result == 2) {
+        return true;
+    } else if (result == 0) {
+        return false;
+    } else {
+        // We could implement another, deterministic check here, but this path is only traveled 10e-29% of the time, so...)
+        return true;
+    }
+}
+
 uint8_t factor(uint64_t num, uint64_t *factors, uint64_t *primes, uint64_t primes_count)
 {
 	uint8_t factors_found = 0;
@@ -36,7 +67,7 @@ uint8_t factor(uint64_t num, uint64_t *factors, uint64_t *primes, uint64_t prime
 		return 0; //1's prime factorization is defined as being null
 	}
 
-	if (sorted_array_contains(num, primes, primes_count)) {
+	if (isprime(num, primes, primes_count)) {
 		factors[0] = num;
 		return 1;
 	}

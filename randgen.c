@@ -3,14 +3,16 @@
 
 int main(int argc, char **argv)
 {
-    if (argc != 3) {
-        printf("This program needs to be called with 2 arguments: \n \
+    if (argc != 4) {
+        printf("This program needs to be called with 3 arguments: \n \
+                \t The maximum number to generate, \n \
                 \t The quantity of random numbers to generate, \n \
                 \t And the output file.\n");
         return 1;
     }
-
-    int quantity = atoi(argv[1]);
+    
+    int max = atoi(argv[1]);
+    int quantity = atoi(argv[2]);
 
     int seed;
     FILE *random = fopen("/dev/random", "r");
@@ -24,14 +26,14 @@ int main(int argc, char **argv)
     fclose(random);
     
     srand(seed);
-    FILE *out = fopen(argv[2], "w");
+    FILE *out = fopen(argv[3], "w");
     if (!out) {
         printf("Couldn't open file %s!\n", argv[2]);
         return 1;
     }
 
     for (int i=0; i<quantity; i++) {
-        fprintf(out, "%d\n", rand()%1000000);
+        fprintf(out, "%d\n", rand()%max);
     }
     fclose(out);
 }
