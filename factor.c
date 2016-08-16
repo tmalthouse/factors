@@ -21,21 +21,22 @@ int countlines(FILE *fp)
 
 
 
-bool sorted_array_contains(uint64_t val, uint64_t *array, uint64_t len)
+bool sorted_array_contains(mpz_t val, mpz_t *array, uint64_t len)
 {
-	for (uint64_t i=0; array[i]>val || i>len; i++) {
-		if (array[i] == val) {
+	for (uint64_t i=0; mpz_cmp(array[i], val)>0 || i>len; i++) {
+		if (!mpz_cmp(array[i], val)) {
 			return true;
 		}
 	}
 	return false;
 }
 
-bool isprime(uint64_t val, uint64_t *primes, uint64_t len)
+bool isprime(mpz_t val, mpz_t *primes, uint64_t len)
 {
-    uint64_t max_cached = primes[len-1];
+    mpz_t max_cached;
+    mpz_init_set(max_cached, primes[len-1]);
 
-    if (val <= max_cached) {
+    if (mpz_cmp(val, max_cached)<=0) {
         if (sorted_array_contains(val, primes, len)) {
             return true;
         } else {
@@ -43,11 +44,7 @@ bool isprime(uint64_t val, uint64_t *primes, uint64_t len)
         }
     }
 
-    mpz_t num;
-
-    mpz_init_set_ui(num, val);
-
-    int result = mpz_probab_prime_p(num, 50);
+    int result = mpz_probab_prime_p(val, 50);
 
     if (result == 2) {
         return true;
@@ -59,37 +56,42 @@ bool isprime(uint64_t val, uint64_t *primes, uint64_t len)
     }
 }
 
-uint8_t factor(uint64_t num, uint64_t *factors, uint64_t *primes, uint64_t primes_count)
+uint8_t factor(mpz_t num, mpz_t *factors, mpz_t *primes, uint64_t primes_count)
 {
 	uint8_t factors_found = 0;
 
-	if (num == 0) {
+	if (!mpz_cmp_si(num, 1)) {
 		return 0; //1's prime factorization is defined as being null
 	}
 
 	if (isprime(num, primes, primes_count)) {
-		factors[0] = num;
+	    mpz_init_set(factors[0], num);
 		return 1;
 	}
 
+    mpz_t mod, quot;
+    mpz_init(mod);
+    mpz_init(quot);
 	for (uint64_t i=0; i<primes_count; i++) {
-		if (num%primes[i] == 0) {
-            factors[0] = primes[i];
-			factors_found++;
-			factors_found += factor(num/primes[i], factors+1, primes, primes_count);
-			break;
-		}
+        if (({mpz_mod(mod, num, primes[i]); !mpz_cmp(mod, 0);})) {
+           mpz_set(factors[0], primes[i]);
+           factors_found++;
+           factors_found += factor(({mpz_divexact(quot, num, primes[i]); quot;}), 
+                                factors+1, primes, primes_count);
+           break;
+        }
 	}
+    mpz_clears(mod, quot, NULL);
 	return factors_found;
 }
 
-void fill_num_array(FILE *fp, uint64_t *arr)
+void fill_num_array(FILE *fp, mpz_t *arr)
 {
 	uint64_t index = 0;
 	while (!feof(fp)) {
-		char buf[32]; //Large enough to hold 2^64
-		if (fgets(buf, 32, fp)) {
-			arr[index] = atoll(buf);
+		char buf[128]; //That's big enough to hold any reasonable number—up to 10^127
+		if (fgets(buf, 128, fp)) {
+            mpz_init_set_str(arr[index], buf, 10);
 			index++;
 		}
 	}
@@ -106,13 +108,12 @@ int main(int argc, char **argv)
     }
     
 	fseek(primes_f, 0L, SEEK_END);
-	size_t sz = ftell(primes_f);
-	rewind(primes_f);
+	uint64_t sz = countlines(primes_f);
 	
-	uint64_t *primes = calloc(sz, 1);
-	uint64_t numprimes = sz/sizeof(uint64_t);
+	mpz_t *primes = calloc(sz, sizeof(mpz_t));
+	uint64_t numprimes = sz;
 
-	fread(primes, sizeof(uint64_t), numprimes, primes_f);
+    fill_num_array(primes_f, primes);
 
 	if (argc!=2) {
 		fprintf(stderr, "This program needs ONE argument—a list of numbers to factorize\n");
@@ -128,7 +129,7 @@ int main(int argc, char **argv)
 	int numcount = countlines(input);
     printf("Done parsing input file!\n");
 
-	uint64_t *numbers = calloc(sizeof(uint64_t), numcount);
+	mpz_t *numbers = calloc(sizeof(mpz_t), numcount);
 
 	fill_num_array(input, numbers);
     

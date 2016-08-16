@@ -1,4 +1,4 @@
-CFLAGS=-Wpedantic -Wall -O3 -ffast-math -std=c11
+CFLAGS=-Wpedantic -Wall -O3 -ffast-math -std=gnu11
 
 all: cache factor
 
