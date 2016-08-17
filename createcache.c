@@ -42,7 +42,9 @@ int main(int argc, char **argv)
 	FILE *out;
 	out = fopen("primes.cache", "w");
 
-	fwrite(primes, sizeof(uint64_t), primes_index, out);
-	fclose(out);
+	for (uint64_t j=0; j<=primes_index; j++) {
+        fprintf(out, "%llu\n", primes[j]);
+    }
+    fclose(out);
 	return 1;
 }

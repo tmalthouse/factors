@@ -14,7 +14,7 @@ int countlines(FILE *fp)
             lines++;
         }
     } while (ch != EOF);
-
+    printf("Counted %d lines\n", lines);
 	rewind(fp);
 	return lines;
 }
@@ -61,6 +61,7 @@ uint8_t factor(mpz_t num, mpz_t *factors, mpz_t *primes, uint64_t primes_count)
 	uint8_t factors_found = 0;
 
 	if (!mpz_cmp_si(num, 1)) {
+        puts("THis number is 1!");
 		return 0; //1's prime factorization is defined as being null
 	}
 
@@ -73,10 +74,14 @@ uint8_t factor(mpz_t num, mpz_t *factors, mpz_t *primes, uint64_t primes_count)
     mpz_init(mod);
     mpz_init(quot);
 	for (uint64_t i=0; i<primes_count; i++) {
-        if (({mpz_mod(mod, num, primes[i]); !mpz_cmp(mod, 0);})) {
+        // Equivalent to if(num%primes[i]==0)
+        mpz_mod(mod, num, primes[i]);
+        if (!mpz_cmp(mod, 0)) {
+            puts("In the factor loop");
            mpz_set(factors[0], primes[i]);
            factors_found++;
-           factors_found += factor(({mpz_divexact(quot, num, primes[i]); quot;}), 
+           // Equivalent to +=factor(num/primes[i], factors+1, primes, primes_count)
+           factors_found += factor(({mpz_cdiv_q(quot, num, primes[i]); quot;}), 
                                 factors+1, primes, primes_count);
            break;
         }
@@ -111,7 +116,8 @@ int main(int argc, char **argv)
 	uint64_t sz = countlines(primes_f);
 	
 	mpz_t *primes = calloc(sz, sizeof(mpz_t));
-	uint64_t numprimes = sz;
+    printf("%p\n", primes);
+    uint64_t numprimes = sz;
 
     fill_num_array(primes_f, primes);
 
@@ -141,7 +147,7 @@ int main(int argc, char **argv)
         perror("Error:");
         return 1;
     }
-
+    printf("numprimes is %llu\n", numprimes);
 	for (uint64_t i=0; i<numcount; i++) {
 		mpz_t factors[64];
 		uint8_t factor_count = factor(numbers[i], factors, primes, numprimes);
