@@ -143,11 +143,15 @@ int main(int argc, char **argv)
     }
 
 	for (uint64_t i=0; i<numcount; i++) {
-		uint64_t factors[64];
+		mpz_t factors[64];
 		uint8_t factor_count = factor(numbers[i], factors, primes, numprimes);
-		fprintf(output, "%llu: ", numbers[i]);
+
+        char buf[128];
+        mpz_get_str(buf, 10, numbers[i]);
+		fprintf(output, "%s: ", buf);
 		for (uint8_t j=0; j<factor_count; j++) {
-			fprintf(output, "%llu ", factors[j]);
+            mpz_get_str(buf, 10, factors[j]);
+			fprintf(output, "%s ", buf);
 		}
 		fprintf(output, "\n");
         if (i%1000==0) {
